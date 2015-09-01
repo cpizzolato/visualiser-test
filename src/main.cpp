@@ -19,9 +19,9 @@ int main() {
     viz.setShowFrameRate(true);
     viz.setBackgroundType(SimTK::Visualizer::BackgroundType::SolidColor);
     viz.setBackgroundColor(SimTK::Black);
-    viz.setMode(SimTK::Visualizer::Mode::RealTime);
+    viz.setMode(SimTK::Visualizer::Mode::Sampling);
     viz.setShutdownWhenDestructed(true);
-    viz.setDesiredBufferLengthInSec(0);
+    viz.setDesiredBufferLengthInSec(1);
     system.realizeTopology();
     SimTK::State state = system.getDefaultState();
     freeSphere.setQ(state, SimTK::Vec7(0, 0, 0, 1, 1, 1, 0));
@@ -29,7 +29,7 @@ int main() {
     system.realize(state);
     viz.report(state);
     std::ofstream outF("dumpStats.txt");
-    viz.setDesiredFrameRate(200);
+    viz.setDesiredFrameRate(100);
     unsigned nFrames(0), frameCounter(0);
     unsigned timeStepMilliseconds = 5;
     auto start = std::chrono::system_clock::now();
@@ -39,12 +39,12 @@ int main() {
         double y(cos(nFrames*timeStepMilliseconds*1e-3));
         double z((x + y) / 2);
         freeSphere.setQToFitTranslation(state, SimTK::Vec3(x, y, z));
-        //    viz.report(state);
-        viz.drawFrameNow(state);
+        viz.report(state);
+       // viz.drawFrameNow(state);
         viz.dumpStats(outF);
         ++frameCounter;
         ++nFrames;
-        //   std::this_thread::sleep_for(std::chrono::milliseconds(timeStepMilliseconds));
+        std::this_thread::sleep_for(std::chrono::milliseconds(timeStepMilliseconds));
 
         if ((std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - start)) > std::chrono::milliseconds(1000)) {
             std::cout << "\n" << frameCounter << "\n";
